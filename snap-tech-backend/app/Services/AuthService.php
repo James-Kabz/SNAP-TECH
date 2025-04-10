@@ -50,6 +50,10 @@ class AuthService
 
     public function logout()
     {
+        // Revoke all tokens for the authenticated user
+        if (Auth::check()) {
+            Auth::user()->tokens()->delete();
+        }
         Auth::guard('web')->logout();
     }
 }

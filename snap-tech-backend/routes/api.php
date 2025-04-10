@@ -19,7 +19,7 @@ Route::get('/user', function (Request $request) {
 })->middleware('auth:sanctum');
 
 
-Route::apiResource('/permissions',PermissionController::class);
+Route::apiResource('/permissions',PermissionController::class)->middleware('auth:sanctum');
 
 
 // roles
