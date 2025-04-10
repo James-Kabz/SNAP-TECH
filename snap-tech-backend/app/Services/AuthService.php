@@ -17,18 +17,35 @@ class AuthService
             'password' => bcrypt($data['password']),
         ]);
 
+        $user->assignRole('user');
+
+        // registered user and the token
+        $token = $user->createToken('auth_token')->plainTextToken;
+
         Auth::login($user);
 
-        return $user;
+        return [
+            'user' => $user,
+            'token' => $token
+        ];
     }
 
     public function login(array $credentials)
     {
-        if (!Auth::attempt($credentials)) {
+        // Remove 'id' from credentials if it exists
+        $loginCredentials = array_intersect_key($credentials, array_flip(['email', 'password']));
+
+        if (!Auth::attempt($loginCredentials)) {
             return false;
         }
 
-        return Auth::user();
+        $user = Auth::user();
+        $token = $user->createToken('auth_token')->plainTextToken;
+
+        return [
+            'user' => $user,
+            'token' => $token
+        ];
     }
 
     public function logout()
