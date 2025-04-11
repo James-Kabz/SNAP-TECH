@@ -68,7 +68,7 @@ class CategoryController extends Controller
         try {
             $category = $this->categoryRepositoryInterface->update($updateDetails, $id);
             DB::commit();
-            return ApiResponseClass::sendResponse('Category Update Successfull','', 200);
+            return ApiResponseClass::sendResponse('Category Update Successful','', 200);
         } catch (\Exception $e) {
             return ApiResponseClass::rollback($e);
         }
@@ -79,6 +79,6 @@ class CategoryController extends Controller
     public function destroy($id)
     {
         $this->categoryRepositoryInterface->delete($id);
-        return ApiResponseClass::sendResponse('Category Deleted Successfully','',200);
+        return ApiResponseClass::sendResponse('Category Delete Successful','',200);
     }
 }
