@@ -88,7 +88,11 @@ class RoleController extends Controller
             $role = $this->roleRepositoryInterface->getById($roleId);
             $permissions = $role->permissions->pluck('name'); // or 'name'
 
-            return ApiResponseClass::sendResponse($permissions, 'Role permissions fetched successfully', 200);
+            $response = [
+                'role_name' => $role->name,
+                'permissions' => $permissions
+            ];
+            return ApiResponseClass::sendResponse($response, 'Role permissions fetched successfully', 200);
         } catch (\Exception $e) {
             return ApiResponseClass::rollback($e);
         }
