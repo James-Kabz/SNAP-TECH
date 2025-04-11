@@ -32,14 +32,12 @@ class AuthService
 
     public function login(array $credentials)
     {
-        // Remove 'id' from credentials if it exists
-        $loginCredentials = array_intersect_key($credentials, array_flip(['email', 'password']));
+        $user = User::where('email', $credentials['email'])->first();
 
-        if (!Auth::attempt($loginCredentials)) {
+        if (!$user || !Hash::check($credentials['password'], $user->password)) {
             return false;
         }
 
-        $user = Auth::user();
         $token = $user->createToken('auth_token')->plainTextToken;
 
         return [
@@ -47,7 +45,6 @@ class AuthService
             'token' => $token
         ];
     }
-
     public function logout()
     {
         // Revoke all tokens for the authenticated user

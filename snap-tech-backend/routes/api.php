@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Auth\AuthController;
+use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\RoleController;
 use Illuminate\Http\Request;
@@ -30,3 +31,7 @@ Route::get('/roles/{roleId}/give-permissions', [RoleController::class, 'getRoleP
 // Route::get('/roles/{roleId}/permissions', [RoleController::class, 'addPermissionToRole']);
 
 Route::post('/roles/{roleId}/give-permissions', [RoleController::class, 'syncPermissionToRole']);
+
+
+// categories apis
+Route::apiResource('/categories',CategoryController::class);

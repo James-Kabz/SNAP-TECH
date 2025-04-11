@@ -40,9 +40,14 @@ class AuthController extends Controller
     {
         try{
             $credentials = $request->only('id','email', 'password');
-
             $result = $this->authService->login($credentials);
 
+            if (!$result) {
+                return response()->json([
+                    'message' => 'Invalid email or password.'
+                ], 401);
+            }
+            
             return ApiResponseClass::sendResponse( [
                 'user' => new UserResource($result),
             ], 'User logged in successfully', 200);
