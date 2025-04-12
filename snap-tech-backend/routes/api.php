@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\OrderController;
 use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\RoleController;
 use Illuminate\Http\Request;
@@ -35,3 +36,6 @@ Route::post('/roles/{roleId}/give-permissions', [RoleController::class, 'syncPer
 
 // categories apis
 Route::apiResource('/categories',CategoryController::class);
+
+// orders apis
+Route::apiResource('/orders',OrderController::class);
