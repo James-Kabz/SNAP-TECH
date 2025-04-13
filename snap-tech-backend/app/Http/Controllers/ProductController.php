@@ -38,12 +38,17 @@ class ProductController extends Controller
     // store product
     public function store(StoreProductRequest $request)
     {
+        $imagePath = null;
+
+        if ($request->hasFile('image_url')) {
+            $imagePath = $request->file('image_url')->store('products', 'public');
+        }
         $details = [
             'name' => $request->name,
             'description' => $request->description,
             'price'=> $request->price,
             'stock'=> $request->stock,
-            'image_url' => $request->image_url,
+            'image_url' => $imagePath,
             'category_id'=> $request->category_id,
         ];
 
@@ -61,14 +66,22 @@ class ProductController extends Controller
     // update product
     public function update(UpdateProductRequest $request, $id)
     {
+        $imagePath = null;
+
+        if ($request->hasFile('image_url')) {
+            $imagePath = $request->file('image_url')->store('products', 'public');
+        }        
         $updateDetails = [
             'name' => $request->name,
             'description' => $request->description,
             'price'=> $request->price,
             'stock'=> $request->stock,
-            'image_url' => $request->image_url,
             'category_id'=> $request->category_id,
         ];
+
+        if ($imagePath) {
+            $updateDetails['image_url'] = $imagePath;
+        }
 
         DB::beginTransaction();
         try {

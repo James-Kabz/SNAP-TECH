@@ -2,9 +2,10 @@
 
 namespace App\Repositories;
 
+use App\Interfaces\OrderItemsRepositoryInterface;
 use App\Models\OrderItem;
 
-class OrderItemsRepository
+class OrderItemsRepository implements OrderItemsRepositoryInterface
 {
     /**
      * Create a new class instance.
