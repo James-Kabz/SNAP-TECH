@@ -29,6 +29,7 @@ class AuthController extends Controller
 
             return ApiResponseClass::sendResponse([
                 'user' => new UserResource($user),
+                'token' => $user->token
             ], 'User registered successfully', 200);
         } catch (\Exception $e) {
             return ApiResponseClass::rollback($e);   

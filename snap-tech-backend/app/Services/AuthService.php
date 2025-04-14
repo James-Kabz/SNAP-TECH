@@ -11,23 +11,20 @@ class AuthService
 {
     public function register(array $data)
     {
+        // Create user
         $user = User::create([
             'name' => $data['name'],
             'email' => $data['email'],
-            'password' => bcrypt($data['password']),
+            'password' => Hash::make($data['password']),
         ]);
-
-        $user->assignRole('user');
-
-        // registered user and the token
+        
+        // For API authentication with Sanctum, create token instead of login
         $token = $user->createToken('auth_token')->plainTextToken;
-
-        Auth::login($user);
-
-        return [
-            'user' => $user,
-            'token' => $token
-        ];
+        
+        // Add token to user object to return it
+        $user->token = $token;
+        
+        return $user;
     }
 
     public function login(array $credentials)

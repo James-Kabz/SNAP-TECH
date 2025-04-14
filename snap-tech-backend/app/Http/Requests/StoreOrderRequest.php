@@ -25,7 +25,7 @@ class StoreOrderRequest extends FormRequest
     {
         return [
             'user_id' => 'required',
-            'status' => 'pending',
+            'status' => 'nullable|string|in:pending,processing,completed,cancelled',
             'total'=> 'nullable|int',
         ];
     }

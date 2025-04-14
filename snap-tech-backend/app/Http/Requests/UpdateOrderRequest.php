@@ -24,9 +24,9 @@ class UpdateOrderRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'user_id' => 'required',
-            'status' => 'pending',
-            'total'=> 'nullable|int',
+            'user_id' => 'sometimes|required|exists:users,id',
+            'status' => 'sometimes|required|in:pending,processing,completed,cancelled',
+            'total' => 'sometimes|required|numeric',
         ];
     }
     public function failedValidation(Validator $validator)

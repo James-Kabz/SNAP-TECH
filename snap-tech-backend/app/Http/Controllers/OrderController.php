@@ -40,7 +40,7 @@ class OrderController extends Controller
     {
         $details = [
             'user_id' => $request->user_id,
-            'status' => $request->status,
+            'status' => 'pending',
             'total' => $request->total
         ];
 
