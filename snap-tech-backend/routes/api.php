@@ -46,4 +46,4 @@ Route::apiResource('/products',ProductController::class);
 Route::apiResource('/orders',OrderController::class);
 
 // orderItems apis
-Route::apiResource('/orderItems',OrderItemsController::class);
+Route::apiResource('/order-items',OrderItemsController::class);
