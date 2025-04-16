@@ -25,21 +25,22 @@ export default function HomePage() {
 
   useEffect(() => {
     const fetchProducts = async () => {
-      try {
-        const [featuredRes, newArrivalsRes] = await Promise.all([
-          axios.get(`${process.env.REACT_APP_API_URL}/api/products?featured=1`),
-          axios.get(`${process.env.REACT_APP_API_URL}/api/products?sort=created_at&order=desc&limit=8`),
-        ])
-
-        setFeaturedProducts(featuredRes.data.data)
-        setNewArrivals(newArrivalsRes.data.data)
-        setLoading(false)
-      } catch (error) {
-        console.error("Error fetching products:", error)
-        setLoading(false)
+        try {
+          const apiUrl = import.meta.env.VITE_API_URL ;
+          
+          const [featuredRes, newArrivalsRes] = await Promise.all([
+            axios.get(`${apiUrl}/products?featured=1`),
+            axios.get(`${apiUrl}/products?sort=created_at&order=desc&limit=8`),
+          ])
+      
+          setFeaturedProducts(featuredRes.data.data)
+          setNewArrivals(newArrivalsRes.data.data)
+          setLoading(false)
+        } catch (error) {
+          console.error("Error fetching products:", error)
+          setLoading(false)
+        }
       }
-    }
-
     fetchProducts()
   }, [])
 
