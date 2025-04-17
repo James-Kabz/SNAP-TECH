@@ -1,7 +1,6 @@
 "use client"
 
 import type React from "react"
-
 import { useState } from "react"
 import { Link } from "react-router-dom"
 import { Header } from "@/components/layout/header"
@@ -9,7 +8,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { useAuth } from "@/hooks/use-auth-hook"
-import { useNavigate } from "react-router"
+import { useNavigate } from "react-router-dom"
 import { toast } from "sonner"
 
 export default function LoginPage() {
@@ -23,12 +22,27 @@ export default function LoginPage() {
     e.preventDefault()
     setError("")
 
+    if (!email || !password) {
+      setError("Please enter both email and password")
+      toast.error("Please enter both email and password")
+      return
+    }
+
+
     try {
       await login(email, password)
-      navigate("/")
-    } catch {
+      toast.success("Login successful!")
+      navigate("/adminProducts")
+    } catch (err) {
+      console.error("Login error:", err)
+      
+      if (err instanceof Error) {
+        setError(err.message || "Invalid email or password")
+        toast.error(err.message || "Invalid email or password")
+      } else {
+        setError("Invalid email or password")
         toast.error("Invalid email or password")
-      setError("Invalid email or password")
+      }
     }
   }
 

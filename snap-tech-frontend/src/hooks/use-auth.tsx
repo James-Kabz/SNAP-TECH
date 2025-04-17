@@ -30,7 +30,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const fetchUser = useCallback(async () => {
     try {
-      const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/user`)
+      const apiUrl = import.meta.env.VITE_API_URL ;
+      const response = await axios.get(`${apiUrl}/user`)
       setUser(response.data)
       setLoading(false)
     } catch (error) {
@@ -55,7 +56,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setLoading(true)
     setError(null)
     try {
-      const response = await axios.post(`${process.env.REACT_APP_API_URL}/api/login`, {
+      const apiUrl = import.meta.env.VITE_API_URL ;
+      const response = await axios.post(`${apiUrl}/login`, {
         email,
         password,
       })
@@ -73,7 +75,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setLoading(true)
     setError(null)
     try {
-      const response = await axios.post(`${process.env.REACT_APP_API_URL}/api/register`, {
+      const response = await axios.post(`${process.env.VITE_API_URL}/api/register`, {
         name,
         email,
         password,

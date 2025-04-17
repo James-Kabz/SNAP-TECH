@@ -40,7 +40,7 @@ export default function AdminProductsPage() {
 
   const fetchProducts = async () => {
     try {
-      const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/products`)
+      const response = await axios.get(`${process.env.VITE_API_URL}/api/products`)
       setProducts(response.data.data)
       setLoading(false)
     } catch (error) {
@@ -55,7 +55,7 @@ export default function AdminProductsPage() {
     }
 
     try {
-      await axios.delete(`${process.env.REACT_APP_API_URL}/api/products/${id}`)
+      await axios.delete(`${process.env.VITE_API_URL}/api/products/${id}`)
       setProducts(products.filter((product) => product.id !== id))
     } catch (error) {
       console.error("Error deleting product:", error)
