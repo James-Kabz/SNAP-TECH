@@ -1,9 +1,7 @@
-"use client"
-
-import { useState } from "react"
-import { Link } from "react-router-dom"
-import { ShoppingCart, User, Menu } from "lucide-react"
-import { Button } from "@/components/ui/button"
+// components/layout/header.tsx
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { ShoppingCart, User, Search } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -11,134 +9,112 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { useAuth } from "@/hooks/use-auth-hook"
-import { useCart } from "@/hooks/use-cart-hook"
+} from "@/components/ui/dropdown-menu";
+import { Input } from "@/components/ui/input";
+import { useCart } from "@/hooks/user-cart-hook";
+import { useAuth } from "@/context/UseAuth";
 
 export function Header() {
-  const [isMenuOpen, setIsMenuOpen] = useState(false)
-  const { user, logout } = useAuth()
-  const { cartItems } = useCart()
+  const location = useLocation();
+  const { totalItems } = useCart();
+  const { user, isAuthenticated, logout } = useAuth();
+  const navigate = useNavigate();
 
-  const cartItemCount = cartItems.reduce((total, item) => total + item.quantity, 0)
+  const navLinks = [
+    { href: "/", label: "Home" },
+    { href: "/products", label: "Products" },
+    { href: "/about", label: "About" },
+    { href: "/contact", label: "Contact" },
+  ];
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-background">
-      <div className="container flex h-16 items-center justify-between">
-        <div className="flex items-center">
-          <Button variant="ghost" size="icon" className="md:hidden" onClick={() => setIsMenuOpen(!isMenuOpen)}>
-            <Menu className="h-6 w-6" />
-          </Button>
-          <Link to="/" className="text-xl font-bold">
-            ElectroShop
+    <header className=" top-0 z-50 mx-auto w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <div className="flex h-16 items-center justify-between">
+        {/* Logo */}
+        <div className="flex items-center gap-8">
+          <Link to="/" className="text-lg font-semibold">
+            Snap Tech
           </Link>
-          <nav className="ml-10 hidden space-x-4 md:flex">
-            <Link to="/" className="text-sm font-medium transition-colors hover:text-primary">
-              Home
-            </Link>
-            <Link to="/products" className="text-sm font-medium transition-colors hover:text-primary">
-              All Products
-            </Link>
-            <Link to="/products/phones" className="text-sm font-medium transition-colors hover:text-primary">
-              Phones
-            </Link>
-            <Link to="/products/laptops" className="text-sm font-medium transition-colors hover:text-primary">
-              Laptops
-            </Link>
-            <Link to="/products/accessories" className="text-sm font-medium transition-colors hover:text-primary">
-              Accessories
-            </Link>
+
+          {/* Navigation */}
+          <nav className="hidden md:flex items-center gap-6">
+            {navLinks.map((link) => (
+              <Link
+                key={link.href}
+                to={link.href}
+                className={`text-sm font-medium transition-colors hover:text-primary ${
+                  location.pathname === link.href ? "text-primary" : "text-muted-foreground"
+                }`}
+              >
+                {link.label}
+              </Link>
+            ))}
           </nav>
         </div>
-        <div className="flex items-center space-x-4">
-          <Link to="/cart" className="relative">
-            <Button variant="ghost" size="icon">
+
+        {/* Search and User Actions */}
+        <div className="flex items-center gap-4">
+          {/* Search */}
+          <div className="relative hidden md:block">
+            <Input
+              placeholder="Search products..."
+              className="w-[200px] lg:w-[300px] pl-8"
+            />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          </div>
+
+          {/* Cart */}
+          <Button variant="ghost" size="icon" asChild>
+            <Link to="/cart" className="relative">
               <ShoppingCart className="h-5 w-5" />
-              {cartItemCount > 0 && (
+              {totalItems > 0 && (
                 <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-primary text-xs text-primary-foreground">
-                  {cartItemCount}
+                  {totalItems}
                 </span>
               )}
-            </Button>
-          </Link>
-          {user ? (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon">
-                  <User className="h-5 w-5" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuLabel>My Account</DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem asChild>
-                  <Link to="/profile">Profile</Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Link to="/orders">Orders</Link>
-                </DropdownMenuItem>
-                {user.roles?.includes("admin") && (
+            </Link>
+          </Button>
+
+          {/* User Menu */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon">
+                <User className="h-5 w-5" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              {isAuthenticated ? (
+                <>
+                  <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
                   <DropdownMenuItem asChild>
-                    <Link to="/admin">Admin Dashboard</Link>
+                    <Link to="/account">Profile</Link>
                   </DropdownMenuItem>
-                )}
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={logout}>Logout</DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          ) : (
-            <div className="space-x-2">
-              <Button variant="ghost" asChild>
-                <Link to="/login">Login</Link>
-              </Button>
-              <Button asChild>
-                <Link to="/register">Register</Link>
-              </Button>
-            </div>
-          )}
+                  <DropdownMenuItem asChild>
+                    <Link to="/orders">Orders</Link>
+                  </DropdownMenuItem>
+                  {user?.roles.includes("admin") && (
+                    <DropdownMenuItem asChild>
+                      <Link to="/admin/dashboard">Admin</Link>
+                    </DropdownMenuItem>
+                  )}
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={() => logout(() => navigate('/login'))}>Logout</DropdownMenuItem>
+                </>
+              ) : (
+                <>
+                  <DropdownMenuItem asChild>
+                    <Link to="/login">Login</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link to="/register">Register</Link>
+                  </DropdownMenuItem>
+                </>
+              )}
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
-      {isMenuOpen && (
-        <div className="border-t md:hidden">
-          <nav className="flex flex-col space-y-2 p-4">
-            <Link
-              to="/"
-              className="text-sm font-medium transition-colors hover:text-primary"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              Home
-            </Link>
-            <Link
-              to="/products"
-              className="text-sm font-medium transition-colors hover:text-primary"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              All Products
-            </Link>
-            <Link
-              to="/products/phones"
-              className="text-sm font-medium transition-colors hover:text-primary"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              Phones
-            </Link>
-            <Link
-              to="/products/laptops"
-              className="text-sm font-medium transition-colors hover:text-primary"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              Laptops
-            </Link>
-            <Link
-              to="/products/accessories"
-              className="text-sm font-medium transition-colors hover:text-primary"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              Accessories
-            </Link>
-          </nav>
-        </div>
-      )}
     </header>
-  )
+  );
 }

@@ -22,6 +22,7 @@ class UserResource extends JsonResource
                 'id' => $user->id,
                 'name' => $user->name,
                 'email' => $user->email,
+                'roles' => $user->getRoleNames()->toArray(), // Using Spatie's getRoleNames()
                 // Add other user fields as needed
                 'token' => $this->resource['token'] ?? null,
             ];
@@ -32,6 +33,7 @@ class UserResource extends JsonResource
             'id' => $this->id,
             'name' => $this->name,
             'email' => $this->email,
+            'roles' => $this->getRoleNames()->toArray(), // Using Spatie's getRoleNames()
             // Add other user fields as needed
         ];
     }

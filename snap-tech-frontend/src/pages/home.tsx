@@ -6,7 +6,7 @@ import axios from "axios"
 import { Header } from "@/components/layout/header"
 import { ProductGrid } from "@/components/ui/product-grid"
 import { Button } from "@/components/ui/button"
-import { useCart } from "@/hooks/use-cart-hook"
+import { useCart } from "@/hooks/user-cart-hook"
 
 interface Product {
   id: number
@@ -25,22 +25,22 @@ export default function HomePage() {
 
   useEffect(() => {
     const fetchProducts = async () => {
-        try {
-          const apiUrl = import.meta.env.VITE_API_URL ;
-          
-          const [featuredRes, newArrivalsRes] = await Promise.all([
-            axios.get(`${apiUrl}/products?featured=1`),
-            axios.get(`${apiUrl}/products?sort=created_at&order=desc&limit=8`),
-          ])
-      
-          setFeaturedProducts(featuredRes.data.data)
-          setNewArrivals(newArrivalsRes.data.data)
-          setLoading(false)
-        } catch (error) {
-          console.error("Error fetching products:", error)
-          setLoading(false)
-        }
+      try {
+        const apiUrl = import.meta.env.VITE_API_URL ;
+        const [featuredRes, newArrivalsRes] = await Promise.all([
+          axios.get(`${apiUrl}/products?featured=1`),
+          axios.get(`${apiUrl}/products?sort=created_at&order=desc&limit=8`),
+        ])
+
+        setFeaturedProducts(featuredRes.data.data)
+        setNewArrivals(newArrivalsRes.data.data)
+        setLoading(false)
+      } catch (error) {
+        console.error("Error fetching products:", error)
+        setLoading(false)
       }
+    }
+
     fetchProducts()
   }, [])
 
@@ -61,17 +61,17 @@ export default function HomePage() {
   }
 
   return (
-    <div className="min-h-screen">
+    <div className="">
       <Header />
 
       {/* Hero Section */}
       <section className="bg-muted py-12 md:py-24">
-        <div className="container grid gap-6 md:grid-cols-2 md:gap-12">
+        <div className=" grid gap-6 md:grid-cols-2 md:gap-12">
           <div className="flex flex-col justify-center space-y-4">
             <h1 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">
               The Latest Tech at Your Fingertips
             </h1>
-            <p className="max-w-[600px] text-muted-foreground md:text-xl">
+            <p className="max-w-[1600px] text-muted-foreground md:text-xl">
               Discover the newest phones, laptops, and accessories at competitive prices.
             </p>
             <div className="flex flex-col gap-2 min-[400px]:flex-row">
@@ -95,7 +95,7 @@ export default function HomePage() {
 
       {/* Featured Products */}
       <section className="py-12">
-        <div className="container">
+        <div className="">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-2xl font-bold tracking-tight">Featured Products</h2>
             <Button variant="link" asChild>
@@ -108,7 +108,7 @@ export default function HomePage() {
 
       {/* New Arrivals */}
       <section className="py-12 bg-muted/50">
-        <div className="container">
+        <div className="">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-2xl font-bold tracking-tight">New Arrivals</h2>
             <Button variant="link" asChild>
@@ -121,7 +121,7 @@ export default function HomePage() {
 
       {/* Categories */}
       <section className="py-12">
-        <div className="container">
+        <div className="">
           <h2 className="text-2xl font-bold tracking-tight mb-6">Shop by Category</h2>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
             <Link to="/products/phones" className="group relative overflow-hidden rounded-lg">

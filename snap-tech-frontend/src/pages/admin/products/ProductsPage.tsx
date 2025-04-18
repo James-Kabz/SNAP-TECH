@@ -7,9 +7,9 @@ import { Header } from "@/components/layout/header"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { useAuth } from "@/hooks/use-auth-hook"
 import { Edit, Trash2, Plus } from "lucide-react"
 import { useNavigate } from "react-router"
+import { useAuth } from "@/context/UseAuth"
 
 interface Product {
   id: number
@@ -71,7 +71,7 @@ export default function AdminProductsPage() {
   return (
     <div className="min-h-screen">
       <Header />
-      <div className="container py-8">
+      <div className=" py-8">
         <div className="flex items-center justify-between mb-6">
           <h1 className="text-2xl font-bold">Manage Products</h1>
           <Button asChild>
