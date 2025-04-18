@@ -37,7 +37,7 @@ class ImageController extends Controller
                 ->header('Cache-Control', 'public, max-age=86400');
         } catch (\Exception $e) {
             Log::error('Error serving product image: ' . $e->getMessage());
-            return $this->returnPlaceholder();
+            // return $this->returnPlaceholder();
         }
     }
     
