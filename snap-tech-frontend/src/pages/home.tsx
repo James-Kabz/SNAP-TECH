@@ -12,7 +12,7 @@ interface Product {
   id: number
   name: string
   price: number
-  image: string
+  image_url: string
   description: string
   category_id: number
 }
@@ -51,7 +51,7 @@ export default function HomePage() {
         id: product.id,
         name: product.name,
         price: product.price,
-        image: product.image,
+        image: product.image_url,
       })
     }
   }
@@ -115,7 +115,7 @@ export default function HomePage() {
               <Link to="/products?sort=newest">View all</Link>
             </Button>
           </div>
-          <ProductGrid products={newArrivals} onAddToCart={handleAddToCart} />
+          {/* <ProductGrid products={newArrivals} onAddToCart={handleAddToCart} /> */}
         </div>
       </section>
 

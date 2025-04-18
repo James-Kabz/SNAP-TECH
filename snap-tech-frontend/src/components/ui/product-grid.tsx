@@ -4,7 +4,7 @@ interface Product {
   id: number
   name: string
   price: number
-  image: string
+  image_url: string
   description: string
 }
 
@@ -22,7 +22,7 @@ export function ProductGrid({ products, onAddToCart }: ProductGridProps) {
           id={product.id}
           name={product.name}
           price={product.price}
-          image={product.image}
+          image_url={product.image_url}
           description={product.description}
           onAddToCart={onAddToCart}
         />

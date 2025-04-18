@@ -1,9 +1,8 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Link} from "react-router-dom"
+import { Link } from "react-router-dom"
 import axios from "axios"
-import { Header } from "@/components/layout/header"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
@@ -16,10 +15,10 @@ interface Product {
   name: string
   price: number
   description: string
-  image: string
+  image_url: string | null
   category_id: number
   stock: number
-  created_at: string
+  created_at?: string
 }
 
 export default function AdminProductsPage() {
@@ -28,26 +27,26 @@ export default function AdminProductsPage() {
   const [searchTerm, setSearchTerm] = useState("")
   const { user } = useAuth()
   const navigate = useNavigate()
+  const apiUrl = import.meta.env.VITE_API_URL
 
   useEffect(() => {
     if (!user || !user.roles?.includes("admin")) {
       navigate("/login")
       return
     }
-
-    fetchProducts()
-  }, [user, navigate])
-
-  const fetchProducts = async () => {
-    try {
-      const response = await axios.get(`${process.env.VITE_API_URL}/api/products`)
-      setProducts(response.data.data)
-      setLoading(false)
-    } catch (error) {
-      console.error("Error fetching products:", error)
-      setLoading(false)
+    const fetchProducts = async () => {
+      try {
+        const response = await axios.get(`${apiUrl}/products`)
+        setProducts(response.data.data)
+        setLoading(false)
+      } catch (error) {
+        console.error("Error fetching products:", error)
+        setLoading(false)
+      }
     }
-  }
+    fetchProducts()
+  }, [user, navigate,apiUrl])
+
 
   const handleDelete = async (id: number) => {
     if (!window.confirm("Are you sure you want to delete this product?")) {
@@ -55,14 +54,27 @@ export default function AdminProductsPage() {
     }
 
     try {
-      await axios.delete(`${process.env.VITE_API_URL}/api/products/${id}`)
+      await axios.delete(`${apiUrl}/products/${id}`)
       setProducts(products.filter((product) => product.id !== id))
     } catch (error) {
       console.error("Error deleting product:", error)
     }
   }
 
-  const filteredProducts = products.filter((product) => product.name.toLowerCase().includes(searchTerm.toLowerCase()))
+  // Helper function to get proper image URL
+  const getImageUrl = (image_url: string | null) => {
+    if (!image_url) return "/placeholder.svg"
+    
+    // Extract just the filename from the path
+    const filename = image_url.split('/').pop()
+    
+    // Return the API URL for the image
+    return `${apiUrl}/images/products/${filename}`
+  }
+
+  const filteredProducts = products.filter((product) => 
+    product.name.toLowerCase().includes(searchTerm.toLowerCase())
+  )
 
   if (loading) {
     return <div className="flex h-screen items-center justify-center">Loading...</div>
@@ -70,8 +82,7 @@ export default function AdminProductsPage() {
 
   return (
     <div className="min-h-screen">
-      <Header />
-      <div className=" py-8">
+      <div className="py-8">
         <div className="flex items-center justify-between mb-6">
           <h1 className="text-2xl font-bold">Manage Products</h1>
           <Button asChild>
@@ -115,13 +126,17 @@ export default function AdminProductsPage() {
                   <TableRow key={product.id}>
                     <TableCell>
                       <img
-                        src={product.image || "/placeholder.svg"}
+                        src={getImageUrl(product.image_url)}
                         alt={product.name}
                         className="h-10 w-10 rounded-md object-cover"
+                        onError={(e) => {
+                          // Fallback to placeholder if image fails to load
+                          e.currentTarget.src = "/placeholder.svg"
+                        }}
                       />
                     </TableCell>
                     <TableCell className="font-medium">{product.name}</TableCell>
-                    <TableCell>${product.price.toFixed(2)}</TableCell>
+                    <TableCell>KES {product.price}</TableCell>
                     <TableCell>{product.stock}</TableCell>
                     <TableCell>{product.category_id}</TableCell>
                     <TableCell className="text-right">

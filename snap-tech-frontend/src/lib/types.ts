@@ -13,6 +13,7 @@ export type RegisterData = {
     token?: string;
   };
   
+  
   export type AuthContextType = {
     user: User | null;
     loading: boolean;

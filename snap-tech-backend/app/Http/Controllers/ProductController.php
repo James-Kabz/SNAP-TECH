@@ -22,9 +22,9 @@ class ProductController extends Controller
     // get all products
     public function index()
     {
-        $products = $this->productRepositoryInterface->index();
+        $data = $this->productRepositoryInterface->index();
 
-        return ApiResponseClass::sendResponse(CategoryResource::collection($products),'',200);
+        return ApiResponseClass::sendResponse(ProductResource::collection($data),'',200);
     }
 
     // get product by id

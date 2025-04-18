@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\ImageController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\OrderItemsController;
 use App\Http\Controllers\PermissionController;
@@ -47,3 +48,6 @@ Route::apiResource('/orders',OrderController::class);
 
 // orderItems apis
 Route::apiResource('/order-items',OrderItemsController::class);
+
+// product images
+Route::get('/images/products/{filename}', [ImageController::class, 'getProductImage']);

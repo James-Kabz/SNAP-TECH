@@ -1,4 +1,3 @@
-// components/layout/header.tsx
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { ShoppingCart, User, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -20,16 +19,24 @@ export function Header() {
   const { user, isAuthenticated, logout } = useAuth();
   const navigate = useNavigate();
 
-  const navLinks = [
+  const baseNavLinks = [
     { href: "/", label: "Home" },
     { href: "/products", label: "Products" },
     { href: "/about", label: "About" },
     { href: "/contact", label: "Contact" },
   ];
 
+  // Add admin products link if user is admin
+  const navLinks = user?.roles.includes("admin")
+    ? [
+        ...baseNavLinks,
+        { href: "/admin/products", label: "Admin Products" }
+      ]
+    : baseNavLinks;
+
   return (
-    <header className=" top-0 z-50 mx-auto w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="flex h-16 items-center justify-between">
+    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <div className="container flex h-16 items-center justify-between">
         {/* Logo */}
         <div className="flex items-center gap-8">
           <Link to="/" className="text-lg font-semibold">
@@ -95,11 +102,13 @@ export function Header() {
                   </DropdownMenuItem>
                   {user?.roles.includes("admin") && (
                     <DropdownMenuItem asChild>
-                      <Link to="/admin/dashboard">Admin</Link>
+                      <Link to="/admin/products">Admin Dashboard</Link>
                     </DropdownMenuItem>
                   )}
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={() => logout(() => navigate('/login'))}>Logout</DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => logout(() => navigate('/login'))}>
+                    Logout
+                  </DropdownMenuItem>
                 </>
               ) : (
                 <>
