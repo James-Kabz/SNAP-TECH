@@ -12,6 +12,7 @@ import { CartProvider } from "./hooks/use-cart";
 import AdminProductsPage from "./pages/admin/products/ProductsPage";
 import RegisterPage from "./pages/register";
 import { AuthProvider } from "./context/AuthContext.tsx";
+import { ThemeProvider } from "@/components/theme-provider"; // Add this import
 
 const router = createBrowserRouter([
   {
@@ -65,12 +66,14 @@ const router = createBrowserRouter([
 function App() {
   return (
     <>
-      <AuthProvider>
-        <CartProvider>
-        <RouterProvider router={router} />
-        </CartProvider>
-      </AuthProvider>
-      <Toaster />
+      <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+        <AuthProvider>
+          <CartProvider>
+            <RouterProvider router={router} />
+          </CartProvider>
+        </AuthProvider>
+        <Toaster />
+      </ThemeProvider>
     </>
   );
 }

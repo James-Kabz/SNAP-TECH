@@ -6,9 +6,12 @@ import axios from "axios"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Edit, Trash2, Plus } from "lucide-react"
+import { Edit, Trash2 } from "lucide-react"
 import { useNavigate } from "react-router"
 import { useAuth } from "@/context/UseAuth"
+import { ProductFormModal } from "@/components/ProductFormModal"
+import { ProductFormValues } from "@/schema/product"
+import { toast } from "sonner"
 
 interface Product {
   id: number
@@ -45,8 +48,38 @@ export default function AdminProductsPage() {
       }
     }
     fetchProducts()
-  }, [user, navigate,apiUrl])
+  }, [user, navigate, apiUrl])
 
+  const handleSubmit = async (values: ProductFormValues & { imageFile?: File }) => {
+    try {
+      const formData = new FormData();
+      
+      // Append all product data
+      Object.entries(values).forEach(([key, value]) => {
+        if (key !== 'imageFile' && value !== undefined) {
+          formData.append(key, value.toString());
+        }
+      });
+  
+      // Append the image file with the correct field name
+      if (values.imageFile) {
+        formData.append('image_url', values.imageFile); // Changed from 'image' to 'image_url'
+      }
+  
+      const response = await axios.post(`${apiUrl}/products`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+  
+      setProducts(prev => [...prev, response.data.data]);
+      toast.success("Product created successfully");
+    } catch (error) {
+      console.error("Error creating product:", error);
+      toast.error("Failed to create product");
+      throw error;
+    }
+  };
 
   const handleDelete = async (id: number) => {
     if (!window.confirm("Are you sure you want to delete this product?")) {
@@ -55,7 +88,7 @@ export default function AdminProductsPage() {
 
     try {
       await axios.delete(`${apiUrl}/products/${id}`)
-      setProducts(products.filter((product) => product.id !== id))
+      setProducts(prev => prev.filter((product) => product.id !== id))
     } catch (error) {
       console.error("Error deleting product:", error)
     }
@@ -85,12 +118,10 @@ export default function AdminProductsPage() {
       <div className="py-8">
         <div className="flex items-center justify-between mb-6">
           <h1 className="text-2xl font-bold">Manage Products</h1>
-          <Button asChild>
-            <Link to="/admin/products/create">
-              <Plus className="mr-2 h-4 w-4" />
-              Add Product
-            </Link>
-          </Button>
+          <ProductFormModal
+            triggerText="Add Product"
+            onSubmit={handleSubmit}
+          />
         </div>
 
         <div className="mb-6">
@@ -130,7 +161,6 @@ export default function AdminProductsPage() {
                         alt={product.name}
                         className="h-10 w-10 rounded-md object-cover"
                         onError={(e) => {
-                          // Fallback to placeholder if image fails to load
                           e.currentTarget.src = "/placeholder.svg"
                         }}
                       />

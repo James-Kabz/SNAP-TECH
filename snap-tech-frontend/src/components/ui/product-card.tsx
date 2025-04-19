@@ -3,53 +3,42 @@
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { formatCurrency } from "@/lib/utils"
-import { useState } from "react"
+import { imageService } from "@/services/imageService"
+import { useState, useEffect } from "react"
 
 interface ProductCardProps {
   id: number
   name: string
   price: number
-  image_url: string | null
+  image_url: string
   description: string
   onAddToCart: (id: number) => void
 }
 
 export function ProductCard({ id, name, price, image_url, description, onAddToCart }: ProductCardProps) {
-  const apiUrl = import.meta.env.VITE_API_URL
-  const [imgError, setImgError] = useState(false)
+  const [imageUrl, setImageUrl] = useState<string>("/placeholder.svg")
+  const [imageLoaded, setImageLoaded] = useState<boolean>(false)
   
-  // Helper function to get proper image URL
-  const getImageUrl = (imageUrl: string | null) => {
-    if (!imageUrl || imgError) return "/placeholder.svg"
+  useEffect(() => {
+    // Process the image URL
+    const processedUrl = imageService.getProductImageUrl(image_url)
+    setImageUrl(processedUrl)
     
-    try {
-      // Extract just the filename from the path
-      const filename = imageUrl.split('/').pop()
-      if (!filename) return "/placeholder.svg"
-      
-      // Return the API URL for the image
-      return `${apiUrl}/images/products/${filename}`
-    } catch (error) {
-      console.error("Error processing image URL:", error)
-      return "/placeholder.svg"
-    }
-  }
-
-  const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
-    console.log("Image failed to load:", image_url)
-    setImgError(true)
-    e.currentTarget.src = "/placeholder.svg"
-  }
+  }, [image_url])
 
   return (
     <Card className="overflow-hidden">
-      <div className="aspect-square w-full overflow-hidden">
+      <div className="aspect-square w-full overflow-hidden bg-gray-100">
         <img
-          src={getImageUrl(image_url)}
+          src={imageUrl}
           alt={name}
-          className="h-full w-full object-cover"
-          onError={handleImageError}
+          className="h-full w-full object-cover transition-opacity"
+          style={{ opacity: imageLoaded ? 1 : 0 }}
           loading="lazy"
+          onLoad={() => setImageLoaded(true)}
+          onError={() => {
+            console.error(`Failed to load image for product: ${name}`)
+          }}
         />
       </div>
       <CardHeader className="p-4">
