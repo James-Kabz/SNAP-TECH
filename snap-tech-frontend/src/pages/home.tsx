@@ -115,7 +115,7 @@ export default function HomePage() {
               <Link to="/products?sort=newest">View all</Link>
             </Button>
           </div>
-          {/* <ProductGrid products={newArrivals} onAddToCart={handleAddToCart} /> */}
+          <ProductGrid products={newArrivals} onAddToCart={handleAddToCart} />
         </div>
       </section>
 
