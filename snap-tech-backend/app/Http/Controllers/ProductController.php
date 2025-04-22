@@ -24,7 +24,7 @@ class ProductController extends Controller
     {
         $data = $this->productRepositoryInterface->index();
 
-        return ApiResponseClass::sendResponse(ProductResource::collection($data),'',200);
+        return ApiResponseClass::sendResponse(ProductResource::collection($data), '', 200);
     }
 
     // get product by id

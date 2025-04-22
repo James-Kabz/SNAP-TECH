@@ -1,16 +1,17 @@
-import { ReactNode } from "react"
+"use client"
+import React, { ReactNode } from "react"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "./table"
 
 interface ColumnDef<T> {
     header: string
-    accessor: keyof T | ((row: T) => ReactNode)
-    cell?: (row: T) => void
+    accessor: keyof T | string | ((row: T) => ReactNode)
+    cell?: (row: T) => ReactNode
     className?: string
 }
 
 interface DataTableProps<T> {
     columns: ColumnDef<T> []
-    data: []
+    data: T[]
     emptyMessage?: string
     onRowClick?: (row: T) => void
     className?: string
@@ -23,6 +24,20 @@ export function DataTable<T>({
     onRowClick,
     className = "",
 }: DataTableProps<T>) {
+
+    const getNestedValue = (obj: T, path: string): ReactNode => {
+        const value = path.split('.').reduce<unknown>((acc, key) => {
+            return typeof acc === 'object' && acc !== null && key in acc ? acc[key as keyof typeof acc] : undefined;
+        }, obj);
+        return typeof value === 'string' || typeof value === 'number'
+            ? value
+            : value === null || value === undefined
+                ? null
+                : React.isValidElement(value)
+                    ? value
+                    : JSON.stringify(value);
+    };
+    
     return (
         <div className={`rounded-md border ${className}`}>
             <Table>
@@ -56,7 +71,9 @@ export function DataTable<T>({
                                           ? column.cell(row)
                                           : typeof column.accessor === "function"
                                           ? column.accessor(row)
-                                          : (row[column.accessor as keyof T] as ReactNode)}
+                                          : typeof column.accessor === "string" && column.accessor.includes('.')
+                                          ? getNestedValue(row, column.accessor)
+                                          : (row[column.accessor as keyof T] as string)}
                                     </TableCell>
                                 ))}
 
