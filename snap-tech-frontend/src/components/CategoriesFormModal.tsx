@@ -58,7 +58,7 @@ export function CategoryFormModal({
                     name="description"
                     render={({ field }) => (
                         <FormItem>
-                            <FormLabel>Name</FormLabel>
+                            <FormLabel>Description</FormLabel>
                             <FormControl>
                                 <Input placeholder="Category Description" {...field}/>
                             </FormControl>

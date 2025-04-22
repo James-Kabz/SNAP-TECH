@@ -14,12 +14,6 @@ import { ProductFormValues } from "@/schema/product"
 import { toast } from "sonner"
 import { Product } from "@/lib/types"
 
-// interface Category {
-//   id: number
-//   name: string
-//   description: string
-// }
-
 export default function AdminProductsPage() {
   const [products, setProducts] = useState<Product[]>([])
   // const [categories, setCategories] = useState<Category[]>([])

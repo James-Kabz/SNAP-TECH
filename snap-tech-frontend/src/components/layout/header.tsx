@@ -30,7 +30,8 @@ export function Header() {
   const navLinks = user?.roles.includes("admin")
     ? [
         ...baseNavLinks,
-        { href: "/admin/products", label: "Admin Products" }
+        { href: "/admin/products", label: "Admin Products" },
+        { href: "/admin/categories", label: "Admin Categories"}
       ]
     : baseNavLinks;
 

@@ -13,6 +13,7 @@ import AdminProductsPage from "./pages/admin/products/ProductsPage";
 import RegisterPage from "./pages/register";
 import { AuthProvider } from "./context/AuthContext.tsx";
 import { ThemeProvider } from "@/components/theme-provider"; // Add this import
+import AdminCategoryPage from "./pages/admin/categories/CategoriesPage.tsx";
 
 const router = createBrowserRouter([
   {
@@ -54,6 +55,14 @@ const router = createBrowserRouter([
             element: (
               <RoleRoute requiredRole="admin">
                 <AdminProductsPage />
+              </RoleRoute>
+            )
+          },
+          {
+            path: "admin/categories",
+            element: (
+              <RoleRoute requiredRole="admin">
+                <AdminCategoryPage/>
               </RoleRoute>
             )
           }
