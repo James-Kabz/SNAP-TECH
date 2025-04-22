@@ -28,8 +28,8 @@ export default function HomePage() {
       try {
         const apiUrl = import.meta.env.VITE_API_URL ;
         const [featuredRes, newArrivalsRes] = await Promise.all([
-          axios.get(`${apiUrl}/products?featured=1`),
-          axios.get(`${apiUrl}/products?sort=created_at&order=desc&limit=8`),
+          axios.get(`${apiUrl}/products`),
+          axios.get(`${apiUrl}/products`),
         ])
 
         setFeaturedProducts(featuredRes.data.data)
@@ -115,7 +115,7 @@ export default function HomePage() {
               <Link to="/products?sort=newest">View all</Link>
             </Button>
           </div>
-          {/* <ProductGrid products={newArrivals} onAddToCart={handleAddToCart} /> */}
+          <ProductGrid products={newArrivals} onAddToCart={handleAddToCart} />
         </div>
       </section>
 
