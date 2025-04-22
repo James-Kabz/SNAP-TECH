@@ -73,6 +73,8 @@ export default function AdminProductsPage() {
       });
   
       setProducts(prev => [...prev, response.data.data]);
+      // redirect 
+      navigate("/admin/products");
       toast.success("Product created successfully");
     } catch (error) {
       console.error("Error creating product:", error);
