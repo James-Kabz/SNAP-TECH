@@ -9,7 +9,7 @@ import { ReactNode, useEffect } from "react";
 import { ZodType, ZodTypeDef } from "zod";
 
 interface FormModalProps<T extends Record<string, unknown>> {
-  triggerText?: string;
+  triggerText?: string | ReactNode;
   triggerVariant?: "default" | "destructive" | "outline" | "secondary" | "ghost" | "link";
   triggerIcon?: ReactNode;
   title: string;
@@ -62,7 +62,7 @@ export function FormModal<T extends Record<string, unknown>>({
         <DialogTrigger asChild>
           <Button variant={triggerVariant}>
             {triggerIcon && <span className="mr-2">{triggerIcon}</span>}
-            {triggerText}
+            {typeof triggerText === 'string' ? triggerText : triggerText}
           </Button>
         </DialogTrigger>
       )}

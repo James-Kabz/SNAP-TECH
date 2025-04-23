@@ -5,12 +5,12 @@ import { Textarea } from "@/components/ui/textarea";
 import { FormModal } from "./FormModal";
 import { ProductFormValues, productSchema } from "@/schema/product";
 import { DialogDescription } from "./ui/dialog";
-import { useCallback, useState } from "react";
+import React, { useCallback, useState } from "react";
 import { Upload } from "lucide-react";
 
 
 interface ProductFormModalProps {
-  triggerText?: string;
+  triggerText?: string | React.ReactNode;
   initialValues?: Partial<ProductFormValues>;
   onSubmit: (values: ProductFormValues & { imageFile?: File }) => Promise<void>;
   isOpen?: boolean;

@@ -1,7 +1,6 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Link } from "react-router-dom"
 import axios from "axios"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -77,7 +76,7 @@ export default function AdminProductsPage() {
   
       setProducts(prev => [...prev, response.data.data]);
       navigate("/admin/products");
-      toast.success("Product created successfully");
+      // toast.success("Product created successfully");
     } catch (error) {
       console.error("Error creating product:", error);
       toast.error("Failed to create product");
@@ -109,6 +108,12 @@ export default function AdminProductsPage() {
   const filteredProducts = products.filter((product) => 
     product.name.toLowerCase().includes(searchTerm.toLowerCase())
   )
+
+  const productToFormValues = (product: Product): ProductFormValues => ({
+    ...product,
+    price: Number(product.price),
+    image_url: product.image_url ?? undefined,
+  });
 
   const columns = [
     {
@@ -145,11 +150,11 @@ export default function AdminProductsPage() {
       header: "Actions",
       accessor: (row: Product) => (
         <div className="flex justify-end gap-2">
-          <Button variant="ghost" size="icon" asChild>
-            <Link to={`/admin/products/${row.id}/edit`}>
-              <Edit className="h-4 w-4" />
-            </Link>
-          </Button>
+          <ProductFormModal
+          triggerText={<Edit className="h-4 w-4"/>}
+          initialValues={productToFormValues(row)}
+          onSubmit={handleSubmit}
+          />
           <Button 
             variant="ghost" 
             size="icon" 

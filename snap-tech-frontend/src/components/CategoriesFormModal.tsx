@@ -5,7 +5,7 @@ import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "./ui/f
 import { Input } from "./ui/input";
 
 interface CategoryFormModalProps {
-  triggerText?: string;
+  triggerText?: string | React.ReactNode ;
   initialValues?: Partial<CategoryFormValues>;
   onSubmit:  (values: CategoryFormValues) => Promise<void>;
   isOpen?: boolean;

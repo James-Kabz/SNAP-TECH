@@ -1,7 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
-import { Link } from "react-router-dom"
+import { useState, useEffect, useCallback } from "react"
 import axios from "axios"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -11,8 +10,8 @@ import { useNavigate } from "react-router"
 import { useAuth } from "@/context/UseAuth"
 import { toast } from "sonner"
 import { Category } from "@/lib/types"
-import { CategoryFormValues } from "@/schema/category"
 import { CategoryFormModal } from "@/components/CategoriesFormModal"
+import { CategoryFormValues } from "@/schema/category"
 
 export default function AdminCategoryPage() {
   const [categories, setCategories] = useState<Category[]>([])
@@ -22,43 +21,57 @@ export default function AdminCategoryPage() {
   const navigate = useNavigate()
   const apiUrl = import.meta.env.VITE_API_URL
 
+  const fetchCategories = useCallback(async () => {
+    try {
+      const response = await axios.get(`${apiUrl}/categories`)
+      setCategories(response.data.data)
+      setLoading(false)
+    } catch (error) {
+      console.error("Error fetching categories:", error)
+      setLoading(false)
+    }
+  }, [apiUrl])
+
   useEffect(() => {
     if (!user || !user.roles?.includes("admin")) {
       navigate("/login")
       return
     }
-    const fetchCategories = async () => {
-      try {
-        const response = await axios.get(`${apiUrl}/categories`)
-        setCategories(response.data.data)
-        setLoading(false)
-      } catch (error) {
-        console.error("Error fetching categories:", error)
-        setLoading(false)
-      }
-    }
-
     fetchCategories()
-  }, [user, navigate, apiUrl])
+  }, [user, navigate, apiUrl, fetchCategories])
 
-
-  const handleSubmit = async ( values: CategoryFormValues ) => {
+  const handleSubmit = async (values: CategoryFormValues, onOpenChange?: (open: boolean) => void) => {
     try {
-      const formData = new FormData();
-    
-  
-      const response = await axios.post(`${apiUrl}/categories`, formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      });
-  
-      setCategories(prev => [...prev, response.data.data]);
-      navigate("/admin/categories");
-      toast.success("Category created successfully");
+      const payload = {
+        name: values.name,
+        description: values.description || null
+      };
+
+      if (values.id) {
+        // Update existing category
+        await axios.put(`${apiUrl}/categories/${values.id}`, payload, {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+        toast.success("Category updated successfully");
+      } else {
+        // Create new category
+        await axios.post(`${apiUrl}/categories`, payload, {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+        // toast.success("Category created successfully");
+      }
+      
+      // Refresh the categories list after successful operation
+      await fetchCategories();
+      // close modal
+      onOpenChange?.(false);
     } catch (error) {
-      console.error("Error creating category:", error);
-      toast.error("Failed to create category");
+      console.error("Error saving category:", error);
+      toast.error(`Failed to ${values.id ? "update" : "create"} category`);
       throw error;
     }
   };
@@ -67,10 +80,10 @@ export default function AdminCategoryPage() {
     if (!window.confirm("Are you sure you want to delete this category?")) {
       return
     }
-
     try {
       await axios.delete(`${apiUrl}/categories/${id}`)
-      setCategories(prev => prev.filter((category) => category.id !== id))
+      // Refresh the categories list after deletion
+      await fetchCategories();
       toast.success("Category deleted successfully")
     } catch (error) {
       console.error("Error deleting category:", error)
@@ -78,9 +91,9 @@ export default function AdminCategoryPage() {
     }
   }
 
-  const filteredCategories = categories.filter((category) => 
-    category.name.toLowerCase().includes(searchTerm.toLowerCase())
-  )
+  const filteredCategories = categories.filter(category =>
+    category?.name?.toLowerCase().includes(searchTerm.toLowerCase()) || false
+  );
 
   const columns = [
     {
@@ -88,21 +101,21 @@ export default function AdminCategoryPage() {
       accessor: "name",
     },
     {
-      header: "Category",
+      header: "Description",
       accessor: "description",
     },
     {
       header: "Actions",
       accessor: (row: Category) => (
         <div className="flex justify-end gap-2">
-          <Button variant="ghost" size="icon" asChild>
-            <Link to={`/admin/categories/${row.id}/edit`}>
-              <Edit className="h-4 w-4" />
-            </Link>
-          </Button>
-          <Button 
-            variant="ghost" 
-            size="icon" 
+          <CategoryFormModal
+            triggerText={<Edit className="h-4 w-4" />}
+            initialValues={row}
+            onSubmit={handleSubmit}
+          />
+          <Button
+            variant="ghost"
+            size="icon"
             onClick={(e) => {
               e.stopPropagation()
               handleDelete(row.id)
