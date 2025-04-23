@@ -32,7 +32,7 @@ class ProductController extends Controller
     {
         $product = $this->productRepositoryInterface->getById($id);
 
-        return ApiResponseClass::sendResponse(new ProductResource($product),'',200);
+        return ApiResponseClass::sendResponse(new ProductResource($product), '', 200);
     }
 
     // store product
@@ -46,10 +46,10 @@ class ProductController extends Controller
         $details = [
             'name' => $request->name,
             'description' => $request->description,
-            'price'=> $request->price,
-            'stock'=> $request->stock,
+            'price' => $request->price,
+            'stock' => $request->stock,
             'image_url' => $imagePath,
-            'category_id'=> $request->category_id,
+            'category_id' => $request->category_id,
         ];
 
         DB::beginTransaction();
@@ -57,7 +57,7 @@ class ProductController extends Controller
             $product = $this->productRepositoryInterface->store($details);
 
             DB::commit();
-            return ApiResponseClass::sendResponse(new ProductResource($product),'',200);
+            return ApiResponseClass::sendResponse(new ProductResource($product), '', 200);
         } catch (\Exception $e) {
             return ApiResponseClass::rollback($e);
         }
@@ -65,39 +65,39 @@ class ProductController extends Controller
 
     // update product
     public function update(UpdateProductRequest $request, $id)
-    {
-        $imagePath = null;
+{
+    $updateData = [
+        'name' => $request->input('name'),
+        'description' => $request->input('description'),
+        'price' => $request->input('price'),
+        'stock' => $request->input('stock'),
+        'category_id' => $request->input('category_id'),
+    ];
 
-        if ($request->hasFile('image_url')) {
-            $imagePath = $request->file('image_url')->store('products', 'public');
-        }        
-        $updateDetails = [
-            'name' => $request->name,
-            'description' => $request->description,
-            'price'=> $request->price,
-            'stock'=> $request->stock,
-            'category_id'=> $request->category_id,
-        ];
-
-        if ($imagePath) {
-            $updateDetails['image_url'] = $imagePath;
-        }
-
-        DB::beginTransaction();
-        try {
-            $product = $this->productRepositoryInterface->update($updateDetails,$id);
-
-            DB::commit();
-            return ApiResponseClass::sendResponse('Product Update Successful','',200);
-        } catch (\Exception $e) {
-            return ApiResponseClass::rollback($e);
-        }
+    // Handle image upload if present
+    if ($request->hasFile('image_url')) {
+        $updateData['image_url'] = $request->file('image_url')->store('products', 'public');
     }
+    // Keep existing image if no new image uploaded
+    elseif ($request->input('existing_image')) {
+        $updateData['image_url'] = $request->input('existing_image');
+    }
+
+    DB::beginTransaction();
+    try {
+        $product = $this->productRepositoryInterface->update($updateData, $id);
+        DB::commit();
+        return ApiResponseClass::sendResponse('Product Update Successful', '', 200);
+    } catch (\Exception $e) {
+        DB::rollBack();
+        return ApiResponseClass::throw($e);
+    }
+}
 
     // delete product
     public function destroy($id)
     {
         $this->productRepositoryInterface->delete($id);
-        return ApiResponseClass::sendResponse('Product Delete Successful','',200);
+        return ApiResponseClass::sendResponse('Product Delete Successful', '', 200);
     }
 }

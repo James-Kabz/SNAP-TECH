@@ -37,7 +37,6 @@ export default function AdminProductsPage() {
     try {
       const response = await axios.get(`${apiUrl}/categories`);
       setCategories(response.data.data);
-      console.log(setCategories)
     } catch (error) {
       console.error("Error fetching categories:", error);
     }
@@ -53,49 +52,95 @@ export default function AdminProductsPage() {
   }, [user, navigate, apiUrl, fetchProducts, fetchCategories])
 
   const handleSubmit = async (values: ProductFormValues & { imageFile?: File }, onOpenChange?: (open: boolean) => void) => {
+    console.log("Form values before submission:", values);
     try {
-      const formData = new FormData()
+      const formData = new FormData();
       
-      // Append all product values to formData
-      Object.entries(values).forEach(([key, value]) => {
-        if (key !== 'imageFile' && value !== undefined) {
-          formData.append(key, value.toString())
-        }
-      })
-
-      // Append image file if it exists
-      if (values.imageFile) {
-        formData.append('image_url', values.imageFile)
-      }
-
-      if (values.id) {
-        // Update existing product
-        await axios.put(`${apiUrl}/products/${values.id}`, formData, {
-          headers: {
-            'Content-Type': 'multipart/form-data',
-          },
-        })
-        toast.success("Product updated successfully")
+      // Append all fields including numbers and optional fields
+      formData.append('name', values.name);
+      formData.append('price', String(values.price));
+      formData.append('stock', String(values.stock));
+      formData.append('category_id', String(values.category_id));
+      
+      // Handle optional description
+      if (values.description) {
+        formData.append('description', values.description);
       } else {
-        // Create new product
-        await axios.post(`${apiUrl}/products`, formData, {
-          headers: {
-            'Content-Type': 'multipart/form-data',
-          },
-        })
-        toast.success("Product created successfully")
+        formData.append('description', ''); // Send empty string if null
       }
       
-      // Refresh the products list
-      await fetchProducts()
-      // Close the modal
-      onOpenChange?.(false)
+      // Handle image file
+      if (values.imageFile) {
+        formData.append('image_url', values.imageFile);
+      } else if (values.image_url) {
+        // If no new image but existing image_url, send it as string
+        formData.append('existing_image', values.image_url);
+      }
+
+  
+      const config = {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      };
+  
+      const url = values.id 
+        ? `${apiUrl}/products/${values.id}`
+        : `${apiUrl}/products`;
+      
+      const method = values.id ? 'put' : 'post';
+      
+      await axios[method](url, formData, config);
+      toast.success(`Product ${values.id ? 'updated' : 'created'} successfully`);
+      await fetchProducts();
+      onOpenChange?.(false);
     } catch (error) {
-      console.error("Error saving product:", error)
-      toast.error(`Failed to ${values.id ? "update" : "create"} product`)
-      throw error
+      console.error("Error saving product:", error);
+      toast.error(`Failed to ${values.id ? "update" : "create"} product`);
+      throw error;
     }
   }
+  // const handleSubmit = async (values: ProductFormValues & { imageFile?: File }, onOpenChange?: (open: boolean) => void) => {
+  //   try {
+  //     // Prepare the payload similar to your category form
+  //     const payload = {
+  //       name: values.name,
+  //       description: values.description || null,
+  //       price: values.price,
+  //       stock: values.stock,
+  //       category_id: values.category_id,
+  //       // Handle image separately if it exists
+  //       ...(values.imageFile && { image_url: values.imageFile })
+  //     };
+  
+  //     if (values.id) {
+  //       // Update existing product
+  //       await axios.put(`${apiUrl}/products/${values.id}`, payload, {
+  //         headers: {
+  //           'Content-Type': 'application/json',
+  //         },
+  //       });
+  //       toast.success("Product updated successfully");
+  //     } else {
+  //       // Create new product
+  //       await axios.post(`${apiUrl}/products`, payload, {
+  //         headers: {
+  //           'Content-Type': 'application/json',
+  //         },
+  //       });
+  //       toast.success("Product created successfully");
+  //     }
+      
+  //     // Refresh the products list
+  //     await fetchProducts();
+  //     // Close the modal
+  //     onOpenChange?.(false);
+  //   } catch (error) {
+  //     console.error("Error saving product:", error);
+  //     toast.error(`Failed to ${values.id ? "update" : "create"} product`);
+  //     throw error;
+  //   }
+  // }
 
   const handleDelete = async (id: number) => {
     if (!window.confirm("Are you sure you want to delete this product?")) {
@@ -113,22 +158,26 @@ export default function AdminProductsPage() {
   }
 
   const getImageUrl = (image_url: string | null) => {
-    if (!image_url) return "/placeholder.svg"
-    const filename = image_url.split('/').pop()
-    return `${apiUrl}/images/products/${filename}`
-  }
+    if (!image_url) return "/placeholder.svg";
+    // Check if it's already a full URL
+    if (image_url.startsWith('http')) return image_url;
+    const filename = image_url.split('/').pop();
+    return `${apiUrl}/images/products/${filename}`;
+  };
 
   const filteredProducts = products.filter(product =>
     product?.name?.toLowerCase().includes(searchTerm.toLowerCase()) || false
   )
 
   const productToFormValues = (product: Product): ProductFormValues => ({
-    ...product,
-    price: Number(product.price),
-    stock: Number(product.stock),
+    id: product.id,
+    name: product.name || '', // Ensure name is not undefined
+    description: product.description || '',
+    price: Number(product.price) || 0,
+    stock: Number(product.stock) || 0,
     category_id: product.category?.id || 0,
-    image_url: product.image_url ?? undefined,
-  })
+    image_url: product.image_url ? getImageUrl(product.image_url) : undefined,
+})
 
   const columns = [
     {
