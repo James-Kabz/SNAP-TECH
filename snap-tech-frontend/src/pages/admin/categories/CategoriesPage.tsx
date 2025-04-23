@@ -54,7 +54,7 @@ export default function AdminCategoryPage() {
             'Content-Type': 'application/json',
           },
         });
-        toast.success("Category updated successfully");
+        // toast.success("Category updated successfully");
       } else {
         // Create new category
         await axios.post(`${apiUrl}/categories`, payload, {

@@ -49,7 +49,7 @@ export function ProductFormModal({
   return (
     <FormModal<ProductFormValues>
       triggerText={triggerText}
-      title={initialValues?.id ? "Edit Product" : "Add Product"}
+      title={initialValues?.id ? 'Edit Product' : 'Add Product'}
       initialValues={initialValues}
       validationSchema={productSchema}
       onSubmit={handleFormSubmit}

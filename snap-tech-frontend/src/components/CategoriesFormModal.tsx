@@ -27,7 +27,7 @@ export function CategoryFormModal({
     return (
         <FormModal<CategoryFormValues>
             triggerText={triggerText}
-            title={initialValues?.id ? 'Edit Product' : 'Add Product'}
+            title={initialValues?.id ? 'Edit Category' : 'Add Category'}
             initialValues={initialValues}
             validationSchema={categorySchema}
             onSubmit={handleFormSubmit}
@@ -37,7 +37,7 @@ export function CategoryFormModal({
                 {(form) => (
                     <>
                     <DialogDescription className="mb-4">
-                        {initialValues?.id ? 'Edit the category details' : 'Fill in the details for a new product'}
+                        {initialValues?.id ? 'Edit the category details' : 'Fill in the details for a new category'}
                     </DialogDescription>
                     <FormField
                     control={form.control}
