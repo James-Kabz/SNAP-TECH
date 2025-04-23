@@ -15,6 +15,7 @@ interface ProductFormModalProps {
   onSubmit: (values: ProductFormValues & { imageFile?: File }) => Promise<void>;
   isOpen?: boolean;
   onOpenChange?: (open: boolean) => void;
+  categories: { id: number; name: string }[];
 }
 
 export function ProductFormModal({
@@ -23,9 +24,10 @@ export function ProductFormModal({
   onSubmit,
   isOpen,
   onOpenChange,
+  categories,
 }: ProductFormModalProps) {
 
-    const [previewImage, setPreviewImage] = useState<string | null>(null);
+  const [previewImage, setPreviewImage] = useState<string | null>(null);
   const [imageFile, setImageFile] = useState<File | null>(null);
 
   const handleImageChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
@@ -166,13 +168,18 @@ export function ProductFormModal({
               <FormItem>
                 <FormLabel>Category</FormLabel>
                 <FormControl>
-                  {/* Replace with your actual category select component */}
-                  <Input
-                    type="number"
-                    placeholder="1"
+                  <select
                     {...field}
+                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                     onChange={(e) => field.onChange(parseInt(e.target.value))}
-                  />
+                  >
+                    <option value="">Select a category</option>
+                    {categories.map((category) => (
+                      <option key={category.id} value={category.id}>
+                        {category.name}
+                      </option>
+                    ))}
+                  </select>
                 </FormControl>
                 <FormMessage />
               </FormItem>

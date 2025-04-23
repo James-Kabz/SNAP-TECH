@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import axios from "axios"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -8,81 +8,94 @@ import { DataTable } from "@/components/ui/data-table"
 import { Edit, Trash2 } from "lucide-react"
 import { useNavigate } from "react-router"
 import { useAuth } from "@/context/UseAuth"
+import { toast } from "sonner"
+import { Category, Product } from "@/lib/types"
 import { ProductFormModal } from "@/components/ProductFormModal"
 import { ProductFormValues } from "@/schema/product"
-import { toast } from "sonner"
-import { Product } from "@/lib/types"
 
 export default function AdminProductsPage() {
   const [products, setProducts] = useState<Product[]>([])
-  // const [categories, setCategories] = useState<Category[]>([])
+  const [categories, setCategories] = useState<Category[]>([])
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState("")
   const { user } = useAuth()
   const navigate = useNavigate()
   const apiUrl = import.meta.env.VITE_API_URL
 
+  const fetchProducts = useCallback(async () => {
+    try {
+      const response = await axios.get(`${apiUrl}/products`)
+      setProducts(response.data.data)
+      setLoading(false)
+    } catch (error) {
+      console.error("Error fetching products:", error)
+      setLoading(false)
+    }
+  }, [apiUrl])
+
+  const fetchCategories = useCallback(async () => {
+    try {
+      const response = await axios.get(`${apiUrl}/categories`);
+      setCategories(response.data.data);
+      console.log(setCategories)
+    } catch (error) {
+      console.error("Error fetching categories:", error);
+    }
+  }, [apiUrl]);
+
   useEffect(() => {
     if (!user || !user.roles?.includes("admin")) {
       navigate("/login")
       return
     }
-    const fetchProducts = async () => {
-      try {
-        const response = await axios.get(`${apiUrl}/products`)
-        setProducts(response.data.data)
-        setLoading(false)
-      } catch (error) {
-        console.error("Error fetching products:", error)
-        setLoading(false)
-      }
-    }
-
-    // const fetchCategories = async () => {
-    //   try {
-    //     const response = await axios.get(`${apiUrl}/categories`)
-    //     setCategories(response.data.data)
-    //     setLoading(false)
-    //   } catch (error) {
-    //     console.error("Error fetching Categories", error)
-    //     setLoading(false)
-    //   }
-    // }
-
     fetchProducts()
-    // fetchCategories()
-  }, [user, navigate, apiUrl])
+    fetchCategories()
+  }, [user, navigate, apiUrl, fetchProducts, fetchCategories])
 
-
-  const handleSubmit = async (values: ProductFormValues & { imageFile?: File }) => {
+  const handleSubmit = async (values: ProductFormValues & { imageFile?: File }, onOpenChange?: (open: boolean) => void) => {
     try {
-      const formData = new FormData();
+      const formData = new FormData()
       
+      // Append all product values to formData
       Object.entries(values).forEach(([key, value]) => {
         if (key !== 'imageFile' && value !== undefined) {
-          formData.append(key, value.toString());
+          formData.append(key, value.toString())
         }
-      });
-  
+      })
+
+      // Append image file if it exists
       if (values.imageFile) {
-        formData.append('image_url', values.imageFile);
+        formData.append('image_url', values.imageFile)
       }
-  
-      const response = await axios.post(`${apiUrl}/products`, formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      });
-  
-      setProducts(prev => [...prev, response.data.data]);
-      navigate("/admin/products");
-      // toast.success("Product created successfully");
+
+      if (values.id) {
+        // Update existing product
+        await axios.put(`${apiUrl}/products/${values.id}`, formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        })
+        toast.success("Product updated successfully")
+      } else {
+        // Create new product
+        await axios.post(`${apiUrl}/products`, formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        })
+        toast.success("Product created successfully")
+      }
+      
+      // Refresh the products list
+      await fetchProducts()
+      // Close the modal
+      onOpenChange?.(false)
     } catch (error) {
-      console.error("Error creating product:", error);
-      toast.error("Failed to create product");
-      throw error;
+      console.error("Error saving product:", error)
+      toast.error(`Failed to ${values.id ? "update" : "create"} product`)
+      throw error
     }
-  };
+  }
 
   const handleDelete = async (id: number) => {
     if (!window.confirm("Are you sure you want to delete this product?")) {
@@ -91,7 +104,7 @@ export default function AdminProductsPage() {
 
     try {
       await axios.delete(`${apiUrl}/products/${id}`)
-      setProducts(prev => prev.filter((product) => product.id !== id))
+      await fetchProducts()
       toast.success("Product deleted successfully")
     } catch (error) {
       console.error("Error deleting product:", error)
@@ -105,15 +118,17 @@ export default function AdminProductsPage() {
     return `${apiUrl}/images/products/${filename}`
   }
 
-  const filteredProducts = products.filter((product) => 
-    product.name.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredProducts = products.filter(product =>
+    product?.name?.toLowerCase().includes(searchTerm.toLowerCase()) || false
   )
 
   const productToFormValues = (product: Product): ProductFormValues => ({
     ...product,
     price: Number(product.price),
+    stock: Number(product.stock),
+    category_id: product.category?.id || 0,
     image_url: product.image_url ?? undefined,
-  });
+  })
 
   const columns = [
     {
@@ -151,13 +166,14 @@ export default function AdminProductsPage() {
       accessor: (row: Product) => (
         <div className="flex justify-end gap-2">
           <ProductFormModal
-          triggerText={<Edit className="h-4 w-4"/>}
-          initialValues={productToFormValues(row)}
-          onSubmit={handleSubmit}
+            triggerText={<Edit className="h-4 w-4" />}
+            initialValues={productToFormValues(row)}
+            onSubmit={handleSubmit}
+            categories={categories}
           />
-          <Button 
-            variant="ghost" 
-            size="icon" 
+          <Button
+            variant="ghost"
+            size="icon"
             onClick={(e) => {
               e.stopPropagation()
               handleDelete(row.id)
@@ -183,6 +199,7 @@ export default function AdminProductsPage() {
           <ProductFormModal
             triggerText="Add Product"
             onSubmit={handleSubmit}
+            categories={categories}
           />
         </div>
 
